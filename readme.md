@@ -36,8 +36,6 @@ use gem_rs::client::{GemSession, GemSessionBuilder};
 use gem_rs::init_log;
 use gem_rs::types::{Context, HarmBlockThreshold, Settings};
 
-const API_KEY: &str = "مفتاحك هنا ياحلو";
-
 #[tokio::main]
 async fn main() {
     init_log();
@@ -52,7 +50,7 @@ async fn test_file() {
         .timeout(std::time::Duration::from_secs(30))
         .model(Models::Gemini15Flash)
         .context(Context::new())
-        .build(API_KEY.to_string());
+        .build();
 
     let mut settings = Settings::new();
     settings.set_all_safety_settings(HarmBlockThreshold::BlockNone);
@@ -60,7 +58,7 @@ async fn test_file() {
     settings.set_max_output_tokens(8192);
     settings.set_temperature(1.5);
 
-    let mut file_manager = FileManager::new(API_KEY);
+    let mut file_manager = FileManager::new();
     file_manager.fetch_list().await.unwrap();
     let data = file_manager
         .add_file(Path::new("C:/Users/0xhades/Downloads/9.pdf"))
@@ -85,7 +83,7 @@ async fn test_stream() {
         .timeout(std::time::Duration::from_secs(30))
         .model(Models::Gemini15Flash)
         .context(Context::new())
-        .build(API_KEY.to_string());
+        .build();
 
     let mut settings = Settings::new();
     settings.set_all_safety_settings(HarmBlockThreshold::BlockNone);
@@ -122,7 +120,7 @@ async fn test() {
         .timeout(std::time::Duration::from_secs(30))
         .model(Models::Gemini15Flash)
         .context(Context::new())
-        .build(API_KEY.to_string());
+        .build();
 
     let mut settings = Settings::new();
     settings.set_all_safety_settings(HarmBlockThreshold::BlockNone);
