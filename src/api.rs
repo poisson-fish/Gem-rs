@@ -31,10 +31,18 @@ pub enum Models {
     #[serde(rename = "gemini-1.5-flash-8b-exp-0827")]
     Gemini15Flash8bExp0827,
 
-    /// Default Gemini 1.5 Pro model
-    #[default]
+    /// Gemini 1.5 Pro model
     #[serde(rename = "gemini-1.5-pro")]
     Gemini15Pro,
+
+    /// Default Gemini 2 Flash Experimental model
+    #[default]
+    #[serde(rename = "gemini-2.0-flash-exp")]
+    Gemini2FlashExp,
+
+    /// Gemini 2 Experimental model
+    #[serde(rename = "gemini-exp-1206")]
+    Gemini2Exp1206,
 
     /// Gemini 1.5 Flash model
     #[serde(rename = "gemini-1.5-flash")]
@@ -55,10 +63,16 @@ pub enum Models {
     /// Gemma 2 27B IT model
     #[serde(rename = "gemma-2-27b-it")]
     Gemma2_27bIt,
+
+    /// Custom model
+    Custom(String),
 }
 
 impl ToString for Models {
     fn to_string(&self) -> String {
-        serde_json::to_string(self).unwrap().replace("\"", "")
+        match self {
+            Models::Custom(model) => model.to_string(),
+            _ => serde_json::to_string(self).unwrap().replace("\"", ""),
+        }
     }
 }

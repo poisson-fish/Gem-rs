@@ -67,6 +67,12 @@ impl GemSessionBuilder {
         self
     }
 
+    /// Sets a custom model to use for the session.
+    pub fn custom_model(mut self, model: String) -> Self {
+        self.0.model = Models::Custom(model);
+        self
+    }
+
     /// Sets the connection timeout for API requests.
     pub fn connect_timeout(mut self, connect_timeout: std::time::Duration) -> Self {
         self.0.connect_timeout = connect_timeout;
