@@ -71,7 +71,7 @@ pub enum Models {
 impl ToString for Models {
     fn to_string(&self) -> String {
         match self {
-            Models::Custom(model) => model.to_string(),
+            Models::Custom(model) => model.to_string().replace("\"", ""),
             _ => serde_json::to_string(self).unwrap().replace("\"", ""),
         }
     }

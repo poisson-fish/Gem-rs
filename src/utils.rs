@@ -41,7 +41,7 @@ use std::path::Path;
 /// - Currently, all document types are treated as PDF. This may change in future updates.
 /// - GIF files are currently not supported, as there's a TODO to implement GIF to video conversion.
 /// - All text types (including code files) are currently treated as plain text.
-pub(crate) fn get_mime_type(file_path: &Path) -> Option<String> {
+pub fn get_mime_type(file_path: &Path) -> Option<String> {
     match file_path.extension().and_then(|ext| ext.to_str()) {
         //TODO: Convert all document types to PDF
         Some("pdf") => Some("application/pdf".to_string()),

@@ -26,7 +26,7 @@ pub mod api;
 pub mod client;
 pub mod errors;
 pub mod types;
-mod utils;
+pub mod utils;
 
 /// Initializes the logger for the Gem-rs library.
 ///

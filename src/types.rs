@@ -1,6 +1,7 @@
 use std::{collections::HashMap, path::Path};
 
 use base64::{engine::general_purpose, Engine as _};
+use dotenv::dotenv;
 use log::log;
 use reqwest::header;
 use serde::{Deserialize, Serialize};
@@ -446,7 +447,10 @@ pub struct FileManager {
 }
 
 impl FileManager {
-    pub fn new(api_key: &str) -> Self {
+    pub fn new() -> Self {
+        dotenv().expect("Failed to load Gemini API key");
+        let api_key = std::env::var("GEMINI_API_KEY").unwrap();
+
         Self {
             files: Mutex::new(HashMap::new()),
             api_key: api_key.to_string(),

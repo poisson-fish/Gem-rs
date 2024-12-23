@@ -5,6 +5,7 @@
 //! as well as streaming responses.
 
 use super::types::Context;
+use dotenv::dotenv;
 use error::StreamBodyError;
 use futures::Stream;
 use reqwest::{Client as webClient, StatusCode};
@@ -86,7 +87,9 @@ impl GemSessionBuilder {
     }
 
     /// Builds a `GemSession` with the configured settings and provided API key.
-    pub fn build(self, api_key: String) -> GemSession {
+    pub fn build(self) -> GemSession {
+        dotenv().expect("Failed to load Gemini API key");
+        let api_key = std::env::var("GEMINI_API_KEY").unwrap();
         GemSession::build(api_key, self.0)
     }
 }
@@ -465,16 +468,17 @@ mod tests {
 
     use super::*;
 
-    const API_KEY: &str = "X";
-
     #[tokio::test]
     async fn test_gem_session_send_context() {
+        dotenv().expect("Failed to load Gemini API key");
+        let api_key = std::env::var("GEMINI_API_KEY").unwrap();
+
         let mut session = GemSession::Builder()
             .connect_timeout(std::time::Duration::from_secs(30))
             .timeout(std::time::Duration::from_secs(30))
             .model(Models::Gemini15FlashExp0827)
             .context(Context::new())
-            .build(API_KEY.to_string());
+            .build();
 
         let mut settings = Settings::new();
         settings.set_all_safety_settings(HarmBlockThreshold::BlockNone);
@@ -487,30 +491,33 @@ mod tests {
     #[test]
     fn test_models_display() {
         let model = Models::Gemini15ProExp0827;
-        assert_eq!(model.to_string(), "\"gemini-1.5-pro-exp-0827\"");
+        assert_eq!(model.to_string(), "gemini-1.5-pro-exp-0827");
 
         let model = Models::Gemini15FlashExp0827;
-        assert_eq!(model.to_string(), "\"gemini-1.5-flash-exp-0827\"");
+        assert_eq!(model.to_string(), "gemini-1.5-flash-exp-0827");
 
         let model = Models::Gemini15Flash8bExp0827;
-        assert_eq!(model.to_string(), "\"gemini-1.5-flash-8b-exp-0827\"");
+        assert_eq!(model.to_string(), "gemini-1.5-flash-8b-exp-0827");
 
         let model = Models::Gemini15Pro;
-        assert_eq!(model.to_string(), "\"gemini-1.5-pro\"");
+        assert_eq!(model.to_string(), "gemini-1.5-pro");
 
         let model = Models::Gemini15Flash;
-        assert_eq!(model.to_string(), "\"gemini-1.5-flash\"");
+        assert_eq!(model.to_string(), "gemini-1.5-flash");
 
         let model = Models::Gemini10Pro;
-        assert_eq!(model.to_string(), "\"gemini-1.0-pro\"");
+        assert_eq!(model.to_string(), "gemini-1.0-pro");
 
         let model = Models::Gemma2_2bIt;
-        assert_eq!(model.to_string(), "\"gemma-2-2b-it\"");
+        assert_eq!(model.to_string(), "gemma-2-2b-it");
 
         let model = Models::Gemma2_9bIt;
-        assert_eq!(model.to_string(), "\"gemma-2-9b-it\"");
+        assert_eq!(model.to_string(), "gemma-2-9b-it");
 
         let model = Models::Gemma2_27bIt;
-        assert_eq!(model.to_string(), "\"gemma-2-27b-it\"");
+        assert_eq!(model.to_string(), "gemma-2-27b-it");
+
+        let model = Models::Custom("gemini-3-flash-001".to_string());
+        assert_eq!(model.to_string(), "gemini-3-flash-001");
     }
 }
