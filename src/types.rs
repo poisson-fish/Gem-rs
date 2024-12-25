@@ -462,13 +462,12 @@ impl FileManager {
         file_name: &str,
         bytes: Vec<u8>,
         mime_type: &str,
-        api_key: &str,
     ) -> Result<FileData, GemError> {
         let hash = sha256::digest(&bytes);
         match self.get_file(&hash).await {
             Some(file) => Ok(file),
             None => {
-                let file = File::new(file_name, bytes, mime_type, api_key).await?;
+                let file = File::new(file_name, bytes, mime_type, &self.api_key).await?;
                 let mime_type = file.mime_type.clone();
                 let file_uri = file.uri.clone();
                 let mut files = self.files.lock().await;
