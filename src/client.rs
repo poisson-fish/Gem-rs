@@ -15,6 +15,12 @@ use crate::api::{Models, GENERATE_CONTENT, STREAM_GENERATE_CONTENT};
 use crate::errors::GemError;
 use crate::types::{Blob, Error, FileData, GenerateContentResponse, Role, Settings};
 
+type StreamResponseResult = Result<
+    Box<dyn Stream<Item = Result<GenerateContentResponse, StreamBodyError>> + Unpin>,
+    GemError,
+>;
+type ResponseResult = Result<GenerateContentResponse, GemError>;
+
 /// Represents a session with the Gemini API.
 pub struct GemSession {
     client: Client,
@@ -125,7 +131,7 @@ impl Client {
         &self,
         context: &Context,
         settings: &Settings,
-    ) -> Result<GenerateContentResponse, GemError> {
+    ) -> ResponseResult {
         let url = format!(
             "{}{}:generateContent",
             GENERATE_CONTENT,
@@ -203,8 +209,7 @@ impl Client {
         &self,
         context: &Context,
         settings: &Settings,
-    ) -> Result<impl Stream<Item = Result<GenerateContentResponse, StreamBodyError>>, GemError>
-    {
+    ) -> StreamResponseResult {
         let url = format!(
             "{}{}:streamGenerateContent",
             STREAM_GENERATE_CONTENT,
@@ -227,7 +232,7 @@ impl Client {
                     StatusCode::OK => {
                         let json_stream =
                             response.json_array_stream::<GenerateContentResponse>(2048);
-                        Ok(json_stream)
+                        Ok(Box::new(json_stream))
                     }
                     _ => {
                         return Err(GemError::StreamError(format!(
@@ -271,11 +276,7 @@ impl GemSession {
     }
 
     /// Sends a message to the Gemini API and returns the response.
-    pub async fn send_message(
-        &mut self,
-        message: &str,
-        settings: &Settings,
-    ) -> Result<GenerateContentResponse, GemError> {
+    pub async fn send_message(&mut self, message: &str, settings: &Settings) -> ResponseResult {
         self.context.push_message(None, message.to_string());
         let response = self.send_context(settings).await?;
         if let Some(candidate) = response.get_candidates().first() {
@@ -293,11 +294,7 @@ impl GemSession {
     }
 
     /// Sends a file to the Gemini API and returns the response.
-    pub async fn send_file(
-        &mut self,
-        file_data: FileData,
-        settings: &Settings,
-    ) -> Result<GenerateContentResponse, GemError> {
+    pub async fn send_file(&mut self, file_data: FileData, settings: &Settings) -> ResponseResult {
         self.context.push_file(None, file_data);
 
         let response = self.send_context(settings).await?;
@@ -316,11 +313,7 @@ impl GemSession {
     }
 
     /// Sends a blob to the Gemini API and returns the response.
-    pub async fn send_blob(
-        &mut self,
-        blob: Blob,
-        settings: &Settings,
-    ) -> Result<GenerateContentResponse, GemError> {
+    pub async fn send_blob(&mut self, blob: Blob, settings: &Settings) -> ResponseResult {
         self.context.push_blob(None, blob);
         let response = self.send_context(settings).await?;
         if let Some(candidate) = response.get_candidates().first() {
@@ -343,7 +336,7 @@ impl GemSession {
         message: &str,
         file_data: FileData,
         settings: &Settings,
-    ) -> Result<GenerateContentResponse, GemError> {
+    ) -> ResponseResult {
         self.context
             .push_message_with_file(None, message, file_data);
         let response = self.send_context(settings).await?;
@@ -367,7 +360,7 @@ impl GemSession {
         message: &str,
         blob: Blob,
         settings: &Settings,
-    ) -> Result<GenerateContentResponse, GemError> {
+    ) -> ResponseResult {
         self.context.push_message_with_blob(None, message, blob);
         let response = self.send_context(settings).await?;
         if let Some(candidate) = response.get_candidates().first() {
@@ -389,10 +382,9 @@ impl GemSession {
         &mut self,
         message: &str,
         settings: &Settings,
-    ) -> Result<impl Stream<Item = Result<GenerateContentResponse, StreamBodyError>>, GemError>
-    {
+    ) -> StreamResponseResult {
         self.context.push_message(None, message.to_string());
-        self.send_context_stream(settings).await
+        Ok(Box::new(self.send_context_stream(settings).await?))
     }
 
     /// Sends a file to the Gemini API and returns a stream of responses.
@@ -400,10 +392,9 @@ impl GemSession {
         &mut self,
         file_data: FileData,
         settings: &Settings,
-    ) -> Result<impl Stream<Item = Result<GenerateContentResponse, StreamBodyError>>, GemError>
-    {
+    ) -> StreamResponseResult {
         self.context.push_file(None, file_data);
-        self.send_context_stream(settings).await
+        Ok(Box::new(self.send_context_stream(settings).await?))
     }
 
     /// Sends a blob to the Gemini API and returns a stream of responses.
@@ -411,10 +402,9 @@ impl GemSession {
         &mut self,
         blob: Blob,
         settings: &Settings,
-    ) -> Result<impl Stream<Item = Result<GenerateContentResponse, StreamBodyError>>, GemError>
-    {
+    ) -> StreamResponseResult {
         self.context.push_blob(None, blob);
-        self.send_context_stream(settings).await
+        Ok(Box::new(self.send_context_stream(settings).await?))
     }
 
     /// Sends a message with an attached file to the Gemini API and returns a stream of responses.
@@ -423,11 +413,10 @@ impl GemSession {
         message: &str,
         file_data: FileData,
         settings: &Settings,
-    ) -> Result<impl Stream<Item = Result<GenerateContentResponse, StreamBodyError>>, GemError>
-    {
+    ) -> StreamResponseResult {
         self.context
             .push_message_with_file(None, message, file_data);
-        self.send_context_stream(settings).await
+        Ok(Box::new(self.send_context_stream(settings).await?))
     }
 
     /// Sends a message with an attached blob to the Gemini API and returns a stream of responses.
@@ -436,26 +425,18 @@ impl GemSession {
         message: &str,
         blob: Blob,
         settings: &Settings,
-    ) -> Result<impl Stream<Item = Result<GenerateContentResponse, StreamBodyError>>, GemError>
-    {
+    ) -> StreamResponseResult {
         self.context.push_message_with_blob(None, message, blob);
-        self.send_context_stream(settings).await
+        Ok(Box::new(self.send_context_stream(settings).await?))
     }
 
     /// Internal method to send a context to the Gemini API.
-    async fn send_context(
-        &mut self,
-        settings: &Settings,
-    ) -> Result<GenerateContentResponse, GemError> {
+    async fn send_context(&mut self, settings: &Settings) -> ResponseResult {
         self.client.send_context(&self.context, settings).await
     }
 
     /// Internal method to send a context to the Gemini API and return a stream of responses.
-    async fn send_context_stream(
-        &mut self,
-        settings: &Settings,
-    ) -> Result<impl Stream<Item = Result<GenerateContentResponse, StreamBodyError>>, GemError>
-    {
+    async fn send_context_stream(&mut self, settings: &Settings) -> StreamResponseResult {
         self.client
             .send_context_stream(&self.context, settings)
             .await
