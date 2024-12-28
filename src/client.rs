@@ -21,6 +21,10 @@ pub type StreamResponseResult = Result<
 >;
 pub type ResponseResult = Result<GenerateContentResponse, GemError>;
 
+pub type StreamResponse = Box<dyn futures::Stream<Item = Result<GenerateContentResponse, reqwest_streams::error::StreamBodyError>> + Unpin>;
+
+pub type Response = GenerateContentResponse;
+
 /// Represents a session with the Gemini API.
 pub struct GemSession {
     client: Client,
