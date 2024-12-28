@@ -15,11 +15,11 @@ use crate::api::{Models, GENERATE_CONTENT, STREAM_GENERATE_CONTENT};
 use crate::errors::GemError;
 use crate::types::{Blob, Error, FileData, GenerateContentResponse, Role, Settings};
 
-type StreamResponseResult = Result<
+pub type StreamResponseResult = Result<
     Box<dyn Stream<Item = Result<GenerateContentResponse, StreamBodyError>> + Unpin>,
     GemError,
 >;
-type ResponseResult = Result<GenerateContentResponse, GemError>;
+pub type ResponseResult = Result<GenerateContentResponse, GemError>;
 
 /// Represents a session with the Gemini API.
 pub struct GemSession {
