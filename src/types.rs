@@ -20,7 +20,7 @@ pub enum PartData {
 
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 #[serde(rename_all = "lowercase")]
-pub(crate) enum Role {
+pub enum Role {
     Model,
     #[default]
     User,
@@ -854,7 +854,7 @@ impl Context {
         }
     }
 
-    pub(crate) fn push_message(&mut self, role: Option<Role>, content: String) {
+    pub fn push_message(&mut self, role: Option<Role>, content: String) {
         self.contents.push(Content {
             role: role,
             parts: vec![Part {
@@ -865,7 +865,7 @@ impl Context {
         });
     }
 
-    pub(crate) fn push_file(&mut self, role: Option<Role>, file_data: FileData) {
+    pub fn push_file(&mut self, role: Option<Role>, file_data: FileData) {
         self.contents.push(Content {
             role: role,
             parts: vec![Part {
@@ -874,7 +874,7 @@ impl Context {
         });
     }
 
-    pub(crate) fn push_blob(&mut self, role: Option<Role>, blob: Blob) {
+    pub fn push_blob(&mut self, role: Option<Role>, blob: Blob) {
         self.contents.push(Content {
             role: role,
             parts: vec![Part {
@@ -883,7 +883,7 @@ impl Context {
         });
     }
 
-    pub(crate) fn push_message_with_file(
+    pub fn push_message_with_file(
         &mut self,
         role: Option<Role>,
         content: &str,
@@ -904,7 +904,7 @@ impl Context {
         });
     }
 
-    pub(crate) fn push_message_with_blob(&mut self, role: Option<Role>, content: &str, blob: Blob) {
+    pub fn push_message_with_blob(&mut self, role: Option<Role>, content: &str, blob: Blob) {
         self.contents.push(Content {
             role: role,
             parts: vec![
@@ -920,7 +920,7 @@ impl Context {
         });
     }
 
-    pub(crate) fn build(&self, settings: &Settings) -> GenerateContentRequest {
+    pub fn build(&self, settings: &Settings) -> GenerateContentRequest {
         GenerateContentRequest::new(
             self,
             settings.generation_config.clone(),
@@ -938,23 +938,23 @@ impl Context {
         )
     }
 
-    pub(crate) fn clear(&mut self) {
+    pub fn clear(&mut self) {
         self.contents.clear();
     }
 
-    pub(crate) fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.contents.is_empty()
     }
 
-    pub(crate) fn len(&self) -> usize {
+    pub fn len(&self) -> usize {
         self.contents.len()
     }
 
-    pub(crate) fn get_contents(&self) -> &Vec<Content> {
+    pub fn get_contents(&self) -> &Vec<Content> {
         &self.contents
     }
 
-    pub(crate) fn get_contents_mut(&mut self) -> &mut Vec<Content> {
+    pub fn get_contents_mut(&mut self) -> &mut Vec<Content> {
         &mut self.contents
     }
 }
