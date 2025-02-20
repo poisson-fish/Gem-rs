@@ -605,7 +605,10 @@ impl FileManager {
                         return Err(GemError::FileError(e.to_string()));
                     }
                 },
-                None => return Err(GemError::FileError("Files data not found".to_string())),
+                None => {
+                    // Means there are no files, not an error
+                    break;
+                }
             };
 
             page_token = response_json
