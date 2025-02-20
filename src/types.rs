@@ -244,7 +244,7 @@ struct VideoMetadata {
     video_duration: String,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct File {
     name: String,
@@ -565,7 +565,7 @@ impl FileManager {
         None
     }
 
-    pub async fn fetch_list(&mut self) -> Result<(), GemError> {
+    pub async fn fetch_list(&mut self) -> Result<HashMap<String, File>, GemError> {
         let client = reqwest::Client::new();
         let mut files = Vec::new();
         let mut page_token: Option<String> = None;
@@ -620,13 +620,19 @@ impl FileManager {
         }
 
         let mut files_map = self.files.lock().await;
+        let mut files_map_clone = HashMap::new();
+        for file in files_map.iter() {
+            files_map_clone.insert(file.0.clone(), file.1.clone());
+        }
+
         for mut file in files {
             file.api_key = self.api_key.clone();
             log::info!("File: {:#?}", file);
-            files_map.insert(file.sha256_hash.clone(), file);
+            files_map.insert(file.sha256_hash.clone(), file.clone());
+            files_map_clone.insert(file.sha256_hash.clone(), file);
         }
 
-        Ok(())
+        Ok(files_map_clone)
     }
 
     pub async fn delete_file(&mut self, hash: &str) -> Result<(), GemError> {
