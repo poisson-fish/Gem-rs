@@ -4,7 +4,7 @@ use futures::stream::StreamExt;
 use gem_rs::api::Models;
 use gem_rs::client::{GemSession, GemSessionBuilder};
 use gem_rs::init_log;
-use gem_rs::types::{Blob, Context, FileManager, HarmBlockThreshold, Settings};
+use gem_rs::types::{Blob, Context, FileManager, HarmBlockThreshold, Role, Settings};
 
 #[tokio::main]
 async fn main() {
@@ -38,7 +38,7 @@ async fn test_blob() {
         include_bytes!("C:/Users/0xhades/Downloads/x.png"),
     );
 
-    let response = session.send_blob(blob, &settings).await;
+    let response = session.send_blob(blob, Role::User, &settings).await;
 
     match response {
         Ok(response) => {
@@ -69,7 +69,7 @@ async fn test_blob_stream() {
         include_bytes!("C:/Users/0xhades/Downloads/x.png"),
     );
 
-    let stream_result = session.send_blob_stream(blob, &settings).await;
+    let stream_result = session.send_blob_stream(blob, Role::User, &settings).await;
 
     match stream_result {
         Ok(mut stream) => {
@@ -114,7 +114,7 @@ async fn test_file() {
         .await
         .unwrap();
 
-    let response = session.send_file(data, &settings).await;
+    let response = session.send_file(data, Role::User, &settings).await;
 
     match response {
         Ok(response) => {
@@ -147,7 +147,7 @@ async fn test_file_stream() {
         .await
         .unwrap();
 
-    let stream_result = session.send_file_stream(data, &settings).await;
+    let stream_result = session.send_file_stream(data, Role::User, &settings).await;
 
     match stream_result {
         Ok(mut stream) => {
@@ -183,7 +183,7 @@ async fn test_stream() {
     settings.set_all_safety_settings(HarmBlockThreshold::BlockNone);
 
     let stream_result = session
-        .send_message_stream("Hello! What is your name?", &settings)
+        .send_message_stream("Hello! What is your name?", Role::User, &settings)
         .await;
 
     match stream_result {
@@ -220,7 +220,7 @@ async fn test() {
     settings.set_all_safety_settings(HarmBlockThreshold::BlockNone);
 
     let response = session
-        .send_message("Hello! What is your name?", &settings)
+        .send_message("Hello! What is your name?", Role::User, &settings)
         .await;
 
     match response {

@@ -34,7 +34,7 @@ use futures::stream::StreamExt;
 use gem_rs::api::Models;
 use gem_rs::client::{GemSession, GemSessionBuilder};
 use gem_rs::init_log;
-use gem_rs::types::{Context, HarmBlockThreshold, Settings};
+use gem_rs::types::{Context, HarmBlockThreshold, Role, Settings};
 
 #[tokio::main]
 async fn main() {
@@ -65,7 +65,9 @@ async fn test_file() {
         .await
         .unwrap();
 
-    let response = session.send_file(data, &settings).await;
+    let response = session
+        .send_file(data, Role::User, &settings)
+        .await;
 
     match response {
         Ok(response) => {
@@ -89,7 +91,7 @@ async fn test_stream() {
     settings.set_all_safety_settings(HarmBlockThreshold::BlockNone);
 
     let stream_result = session
-        .send_message_stream("Hello! What is your name?", &settings)
+        .send_message_stream("Hello! What is your name?", Role::User, &settings)
         .await;
 
     match stream_result {
@@ -126,7 +128,7 @@ async fn test() {
     settings.set_all_safety_settings(HarmBlockThreshold::BlockNone);
 
     let response = session
-        .send_message("Hello! What is your name?", &settings)
+        .send_message("Hello! What is your name?", Role::User, &settings)
         .await;
 
     match response {

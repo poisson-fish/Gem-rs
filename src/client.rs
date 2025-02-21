@@ -21,7 +21,11 @@ pub type StreamResponseResult = Result<
 >;
 pub type ResponseResult = Result<GenerateContentResponse, GemError>;
 
-pub type StreamResponse = Box<dyn futures::Stream<Item = Result<GenerateContentResponse, reqwest_streams::error::StreamBodyError>> + Unpin>;
+pub type StreamResponse = Box<
+    dyn futures::Stream<
+            Item = Result<GenerateContentResponse, reqwest_streams::error::StreamBodyError>,
+        > + Unpin,
+>;
 
 pub type Response = GenerateContentResponse;
 
@@ -280,13 +284,18 @@ impl GemSession {
     }
 
     /// Sends a message to the Gemini API and returns the response.
-    pub async fn send_message(&mut self, message: &str, settings: &Settings) -> ResponseResult {
-        self.context.push_message(None, message.to_string());
+    pub async fn send_message(
+        &mut self,
+        message: &str,
+        role: Role,
+        settings: &Settings,
+    ) -> ResponseResult {
+        self.context.push_message(role, message.to_string());
         let response = self.send_context(settings).await?;
         if let Some(candidate) = response.get_candidates().first() {
             if let Some(content) = candidate.get_content() {
                 self.context.push_message(
-                    Some(Role::Model),
+                    Role::Model,
                     match content.get_text() {
                         Some(text) => text.clone(),
                         None => return Err(GemError::EmptyApiResponse),
@@ -298,14 +307,19 @@ impl GemSession {
     }
 
     /// Sends a file to the Gemini API and returns the response.
-    pub async fn send_file(&mut self, file_data: FileData, settings: &Settings) -> ResponseResult {
-        self.context.push_file(None, file_data);
+    pub async fn send_file(
+        &mut self,
+        file_data: FileData,
+        role: Role,
+        settings: &Settings,
+    ) -> ResponseResult {
+        self.context.push_file(role, file_data);
 
         let response = self.send_context(settings).await?;
         if let Some(candidate) = response.get_candidates().first() {
             if let Some(content) = candidate.get_content() {
                 self.context.push_message(
-                    Some(Role::Model),
+                    Role::Model,
                     match content.get_text() {
                         Some(text) => text.clone(),
                         None => return Err(GemError::EmptyApiResponse),
@@ -317,13 +331,18 @@ impl GemSession {
     }
 
     /// Sends a blob to the Gemini API and returns the response.
-    pub async fn send_blob(&mut self, blob: Blob, settings: &Settings) -> ResponseResult {
-        self.context.push_blob(None, blob);
+    pub async fn send_blob(
+        &mut self,
+        blob: Blob,
+        role: Role,
+        settings: &Settings,
+    ) -> ResponseResult {
+        self.context.push_blob(role, blob);
         let response = self.send_context(settings).await?;
         if let Some(candidate) = response.get_candidates().first() {
             if let Some(content) = candidate.get_content() {
                 self.context.push_message(
-                    Some(Role::Model),
+                    Role::Model,
                     match content.get_text() {
                         Some(text) => text.clone(),
                         None => return Err(GemError::EmptyApiResponse),
@@ -339,15 +358,16 @@ impl GemSession {
         &mut self,
         message: &str,
         file_data: FileData,
+        role: Role,
         settings: &Settings,
     ) -> ResponseResult {
         self.context
-            .push_message_with_file(None, message, file_data);
+            .push_message_with_file(role, message, file_data);
         let response = self.send_context(settings).await?;
         if let Some(candidate) = response.get_candidates().first() {
             if let Some(content) = candidate.get_content() {
                 self.context.push_message(
-                    Some(Role::Model),
+                    Role::Model,
                     match content.get_text() {
                         Some(text) => text.clone(),
                         None => return Err(GemError::EmptyApiResponse),
@@ -363,14 +383,15 @@ impl GemSession {
         &mut self,
         message: &str,
         blob: Blob,
+        role: Role,
         settings: &Settings,
     ) -> ResponseResult {
-        self.context.push_message_with_blob(None, message, blob);
+        self.context.push_message_with_blob(role, message, blob);
         let response = self.send_context(settings).await?;
         if let Some(candidate) = response.get_candidates().first() {
             if let Some(content) = candidate.get_content() {
                 self.context.push_message(
-                    Some(Role::Model),
+                    Role::Model,
                     match content.get_text() {
                         Some(text) => text.clone(),
                         None => return Err(GemError::EmptyApiResponse),
@@ -385,9 +406,10 @@ impl GemSession {
     pub async fn send_message_stream(
         &mut self,
         message: &str,
+        role: Role,
         settings: &Settings,
     ) -> StreamResponseResult {
-        self.context.push_message(None, message.to_string());
+        self.context.push_message(role, message.to_string());
         Ok(Box::new(self.send_context_stream(settings).await?))
     }
 
@@ -395,9 +417,10 @@ impl GemSession {
     pub async fn send_file_stream(
         &mut self,
         file_data: FileData,
+        role: Role,
         settings: &Settings,
     ) -> StreamResponseResult {
-        self.context.push_file(None, file_data);
+        self.context.push_file(role, file_data);
         Ok(Box::new(self.send_context_stream(settings).await?))
     }
 
@@ -405,9 +428,10 @@ impl GemSession {
     pub async fn send_blob_stream(
         &mut self,
         blob: Blob,
+        role: Role,
         settings: &Settings,
     ) -> StreamResponseResult {
-        self.context.push_blob(None, blob);
+        self.context.push_blob(role, blob);
         Ok(Box::new(self.send_context_stream(settings).await?))
     }
 
@@ -416,10 +440,11 @@ impl GemSession {
         &mut self,
         message: &str,
         file_data: FileData,
+        role: Role,
         settings: &Settings,
     ) -> StreamResponseResult {
         self.context
-            .push_message_with_file(None, message, file_data);
+            .push_message_with_file(role, message, file_data);
         Ok(Box::new(self.send_context_stream(settings).await?))
     }
 
@@ -428,9 +453,10 @@ impl GemSession {
         &mut self,
         message: &str,
         blob: Blob,
+        role: Role,
         settings: &Settings,
     ) -> StreamResponseResult {
-        self.context.push_message_with_blob(None, message, blob);
+        self.context.push_message_with_blob(role, message, blob);
         Ok(Box::new(self.send_context_stream(settings).await?))
     }
 
@@ -469,7 +495,7 @@ mod tests {
         settings.set_all_safety_settings(HarmBlockThreshold::BlockNone);
 
         let response = session
-            .send_message("Hello! What is your name?", &settings)
+            .send_message("Hello! What is your name?", Role::User, &settings)
             .await;
     }
 

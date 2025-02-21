@@ -863,9 +863,9 @@ impl Context {
         }
     }
 
-    pub fn push_message(&mut self, role: Option<Role>, content: String) {
+    pub fn push_message(&mut self, role: Role, content: String) {
         self.contents.push(Content {
-            role: role,
+            role: Some(role),
             parts: vec![Part {
                 data: PartData::Text {
                     text: content.to_string(),
@@ -874,32 +874,27 @@ impl Context {
         });
     }
 
-    pub fn push_file(&mut self, role: Option<Role>, file_data: FileData) {
+    pub fn push_file(&mut self, role: Role, file_data: FileData) {
         self.contents.push(Content {
-            role: role,
+            role: Some(role),
             parts: vec![Part {
                 data: PartData::FileData { file_data },
             }],
         });
     }
 
-    pub fn push_blob(&mut self, role: Option<Role>, blob: Blob) {
+    pub fn push_blob(&mut self, role: Role, blob: Blob) {
         self.contents.push(Content {
-            role: role,
+            role: Some(role),
             parts: vec![Part {
                 data: PartData::InlineData { inline_data: blob },
             }],
         });
     }
 
-    pub fn push_message_with_file(
-        &mut self,
-        role: Option<Role>,
-        content: &str,
-        file_data: FileData,
-    ) {
+    pub fn push_message_with_file(&mut self, role: Role, content: &str, file_data: FileData) {
         self.contents.push(Content {
-            role: role,
+            role: Some(role),
             parts: vec![
                 Part {
                     data: PartData::Text {
@@ -913,9 +908,9 @@ impl Context {
         });
     }
 
-    pub fn push_message_with_blob(&mut self, role: Option<Role>, content: &str, blob: Blob) {
+    pub fn push_message_with_blob(&mut self, role: Role, content: &str, blob: Blob) {
         self.contents.push(Content {
-            role: role,
+            role: Some(role),
             parts: vec![
                 Part {
                     data: PartData::Text {
