@@ -181,6 +181,7 @@ async fn test_stream() {
 
     let mut settings = Settings::new();
     settings.set_all_safety_settings(HarmBlockThreshold::BlockNone);
+    settings.set_stream_max_json_size(16384);
 
     let stream_result = session
         .send_message_stream("Hello! What is your name?", Role::User, &settings)

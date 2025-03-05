@@ -238,8 +238,9 @@ impl Client {
                 let status_code = response.status();
                 match status_code {
                     StatusCode::OK => {
-                        let json_stream =
-                            response.json_array_stream::<GenerateContentResponse>(2048);
+                        let json_stream = response.json_array_stream::<GenerateContentResponse>(
+                            settings.get_stream_max_json_size() as usize,
+                        );
                         Ok(Box::new(json_stream))
                     }
                     _ => {

@@ -708,6 +708,7 @@ pub struct Settings {
     safety_settings: Option<Vec<SafetySetting>>,
     generation_config: Option<GenerationConfig>,
     system_instruction: Option<String>,
+    stream_max_json_size: Option<u32>,
 }
 
 impl Settings {
@@ -716,7 +717,12 @@ impl Settings {
             safety_settings: None,
             generation_config: None,
             system_instruction: None,
+            stream_max_json_size: Some(16384),
         }
+    }
+
+    pub fn set_stream_max_json_size(&mut self, size: u32) {
+        self.stream_max_json_size = Some(size);
     }
 
     pub fn set_all_safety_settings(&mut self, threshold: HarmBlockThreshold) {
@@ -793,6 +799,10 @@ impl Settings {
 
     pub fn set_system_instruction(&mut self, instruction: &str) {
         self.system_instruction = Some(instruction.to_string());
+    }
+
+    pub fn get_stream_max_json_size(&self) -> u32 {
+        self.stream_max_json_size.unwrap_or(16384)
     }
 }
 
