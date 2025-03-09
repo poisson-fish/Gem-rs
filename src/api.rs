@@ -35,14 +35,30 @@ pub enum Models {
     #[serde(rename = "gemini-1.5-pro")]
     Gemini15Pro,
 
-    /// Default Gemini 2 Flash Experimental model
-    #[default]
+    /// Gemini 2 Flash Experimental model
     #[serde(rename = "gemini-2.0-flash-exp")]
     Gemini2FlashExp,
 
+    /// Default Gemini 2 Flash model
+    #[default]
+    #[serde(rename = "gemini-2.0-flash")]
+    Gemini2Flash,
+
+    /// Gemini 2 Flash Lite model
+    #[serde(rename = "gemini-2.0-flash-lite")]
+    Gemini2FlashLite,
+
+    /// Gemini 2 Flash Thinking Experimental model
+    #[serde(rename = "gemini-2.0-flash-thinking-exp-01-21")]
+    Gemini2FlashThinkingExp,
+
     /// Gemini 2 Experimental model
     #[serde(rename = "gemini-exp-1206")]
-    Gemini2Exp1206,
+    Gemini2ProExp1206,
+
+    /// Gemini 2 Experimental model
+    #[serde(rename = "gemini-2.0-pro-exp-02-05")]
+    Gemini2ProExp,
 
     /// Gemini 1.5 Flash model
     #[serde(rename = "gemini-1.5-flash")]

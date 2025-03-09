@@ -40,10 +40,11 @@ pub struct GemSessionBuilder(Config);
 
 /// Internal configuration structure for `GemSessionBuilder`.
 pub struct Config {
-    timeout: std::time::Duration,
-    connect_timeout: std::time::Duration,
-    model: Models,
-    context: Context,
+    pub timeout: std::time::Duration,
+    pub connect_timeout: std::time::Duration,
+    pub model: Models,
+    pub context: Context,
+    pub api_key: Option<String>
 }
 
 impl GemSessionBuilder {
@@ -54,6 +55,7 @@ impl GemSessionBuilder {
             connect_timeout: std::time::Duration::from_secs(30),
             model: Models::default(),
             context: Context::new(),
+            api_key: None,
         })
     }
 
@@ -100,11 +102,22 @@ impl GemSessionBuilder {
         self
     }
 
+    /// Sets the api key for the session.
+    pub fn api_key(mut self, api_key: String) -> Self {
+        self.0.api_key = Some(api_key);
+        self
+    }
+
     /// Builds a `GemSession` with the configured settings and provided API key.
     pub fn build(self) -> GemSession {
-        dotenv().expect("Failed to load Gemini API key");
-        let api_key = std::env::var("GEMINI_API_KEY").unwrap();
-        GemSession::build(api_key, self.0)
+        if let Some(api_key) = self.0.api_key.clone() {
+            GemSession::build(api_key, self.0)
+        }
+        else {
+            dotenv().expect("Failed to load Gemini API key");
+            let api_key = std::env::var("GEMINI_API_KEY").unwrap();
+            GemSession::build(api_key, self.0)
+        }
     }
 }
 
@@ -462,12 +475,12 @@ impl GemSession {
     }
 
     /// Internal method to send a context to the Gemini API.
-    async fn send_context(&mut self, settings: &Settings) -> ResponseResult {
+    pub async fn send_context(&mut self, settings: &Settings) -> ResponseResult {
         self.client.send_context(&self.context, settings).await
     }
 
     /// Internal method to send a context to the Gemini API and return a stream of responses.
-    async fn send_context_stream(&mut self, settings: &Settings) -> StreamResponseResult {
+    pub async fn send_context_stream(&mut self, settings: &Settings) -> StreamResponseResult {
         self.client
             .send_context_stream(&self.context, settings)
             .await

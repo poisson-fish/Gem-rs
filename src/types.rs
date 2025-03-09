@@ -114,8 +114,8 @@ impl Candidate {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Content {
-    parts: Vec<Part>,   // A vector of Part objects
-    role: Option<Role>, // Role field, optional; either 'user' or 'model'
+    pub parts: Vec<Part>,   // A vector of Part objects
+    pub role: Option<Role>, // Role field, optional; either 'user' or 'model'
 }
 
 impl Content {
@@ -138,7 +138,7 @@ pub struct NoRoleContent {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Part {
     #[serde(flatten)] // This enables the union-like behavior for the different possible types
-    data: PartData, // Union field that can be one of several types
+    pub data: PartData, // Union field that can be one of several types
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -158,8 +158,8 @@ impl Blob {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct FileData {
-    mime_type: String,
-    file_uri: String, // File URI
+    pub mime_type: String,
+    pub file_uri: String, // File URI
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -447,13 +447,20 @@ pub struct FileManager {
 }
 
 impl FileManager {
-    pub fn new() -> Self {
-        dotenv().expect("Failed to load Gemini API key");
-        let api_key = std::env::var("GEMINI_API_KEY").unwrap();
+    pub fn new(api_key: Option<String>) -> Self {
+        if let Some(api_key) = api_key {
+            Self {
+                files: Mutex::new(HashMap::new()),
+                api_key,
+            }
+        } else {
+            dotenv().expect("Failed to load Gemini API key");
+            let api_key = std::env::var("GEMINI_API_KEY").unwrap();
 
-        Self {
-            files: Mutex::new(HashMap::new()),
-            api_key: api_key.to_string(),
+            Self {
+                files: Mutex::new(HashMap::new()),
+                api_key: api_key.to_string(),
+            }
         }
     }
 
@@ -882,6 +889,10 @@ impl Context {
                 },
             }],
         });
+    }
+
+    pub fn push_contents(&mut self, contents: Vec<Content>) {
+        self.contents.extend(contents);
     }
 
     pub fn push_file(&mut self, role: Role, file_data: FileData) {
