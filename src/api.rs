@@ -60,6 +60,10 @@ pub enum Models {
     #[serde(rename = "gemini-2.0-pro-exp-02-05")]
     Gemini2ProExp,
 
+    /// Gemini 2.5 Experimental model
+    #[serde(rename = "gemini-2.5-pro-exp-03-25")]
+    Gemini25ProExp,
+
     /// Gemini 1.5 Flash model
     #[serde(rename = "gemini-1.5-flash")]
     Gemini15Flash,
