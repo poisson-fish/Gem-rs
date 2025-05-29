@@ -61,7 +61,7 @@ pub enum Models {
     Gemini2ProExp,
 
     /// Gemini 2.5 Experimental model
-    #[serde(rename = "gemini-2.5-pro-preview-03-25")]
+    #[serde(rename = "gemini-2.5-pro-preview-05-06")]
     Gemini25ProExp,
 
     /// Gemini 1.5 Flash model
